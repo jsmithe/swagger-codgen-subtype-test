@@ -1,0 +1,47 @@
+{
+  "apiVersion": "1.0.0",
+  "swaggerVersion": "1.2",
+  "apis": [
+    {
+      "path": "/animals",
+      "description": "Get all animals",
+      "operations": [
+        {
+          "httpMethod": "GET",
+          "summary": "Get animals",
+          "nickname": "animals"
+        }
+      ]
+    }
+  ],
+  "models": {
+    "Animal": {
+      "id": "Animal",
+      "required": [
+        "id",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "type": "long"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "subTypes": ["Cat"],
+      "discriminator": "type"
+    },
+    "Cat": {
+      "id": "Cat",
+      "required": [
+        "likesMilk"
+      ],
+      "properties": {
+        "likesMilk": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

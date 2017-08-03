@@ -1,0 +1,73 @@
+// https://github.com/Casturan/swagger-gradle-example/blob/master/build.gradle
+import io.swagger.codegen.config.CodegenConfigurator
+import io.swagger.codegen.DefaultGenerator
+import io.swagger.codegen.Generator
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath('io.swagger:swagger-codegen:2.2.3')
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+
+version '1.0'
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+def resourcesDir = 'src/main/resources'
+def swaggerTargetFolder = 'src/generated/java'
+
+task generateApi {
+    doLast {
+        def config = new CodegenConfigurator()
+        config.setInputSpec("$projectDir/$resourcesDir/test.json")
+        config.setOutputDir("$projectDir")
+        config.setLang('java')
+        config.setAdditionalProperties([
+                'modelPackage'  : 'com.test.model',
+                'sourceFolder'  : swaggerTargetFolder
+        ])
+        config.addSystemProperty("models", "")
+        Generator generator = new DefaultGenerator()
+        generator.opts(config.toClientOptInput()).generate()
+    }
+}
+
+clean.doFirst {
+    delete("${projectDir}/$swaggerTargetFolder")
+}
+
+sourceSets {
+    generated {
+        compileClasspath = configurations.generatedCompile
+    }
+    main {
+        compileClasspath += generated.output
+        runtimeClasspath += generated.output
+    }
+    test {
+        compileClasspath += generated.output
+        runtimeClasspath += generated.output
+    }
+}
+
+jar {
+    from sourceSets.generated.output
+}
+
+compileGeneratedJava.dependsOn generateApi
+classes.dependsOn generatedClasses
+compileJava.dependsOn compileGeneratedJava
+ideaModule.dependsOn generateApi
